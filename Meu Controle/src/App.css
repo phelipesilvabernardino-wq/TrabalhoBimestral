@@ -132,8 +132,16 @@ body {
   margin-bottom: 16px;
 }
 
+.icone-acao {
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.1s;
+}
+.icone-acao:hover {
+  transform: scale(1.2);
+}
 .lixeira:hover {
-  color: #D32F2F;
+  text-shadow: 0 0 5px rgba(211,47,47,0.5);
 }
 
 .modal-overlay {

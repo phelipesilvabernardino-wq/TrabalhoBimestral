@@ -5,6 +5,7 @@ import ModalParcelamento from '../components/ModalParcelamento';
 export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: string) => void }) {
   const [parcelas, setParcelas] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [itemEditando, setItemEditando] = useState<any>(null);
 
   const carregarParcelas = async () => {
     const res = await fetch(`${API_URL}/parcelamentos`);
@@ -13,19 +14,32 @@ export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: str
 
   useEffect(() => { carregarParcelas(); }, []);
 
+  const abrirModalNovo = () => { setItemEditando(null); setModalOpen(true); };
+  const abrirModalEditar = (item: any) => { setItemEditando(item); setModalOpen(true); };
+
   const salvarParcelamento = async (dados: any) => {
-    await fetch(`${API_URL}/parcelamentos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados)
-    });
+    if(itemEditando) {
+      await fetch(`${API_URL}/parcelamentos/${itemEditando.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+    } else {
+      await fetch(`${API_URL}/parcelamentos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+    }
     setModalOpen(false);
     carregarParcelas();
   };
 
   const deletarItem = async (id: number) => {
-    await fetch(`${API_URL}/parcelamentos/${id}`, { method: 'DELETE' });
-    carregarParcelas();
+    if(window.confirm('Excluir este parcelamento?')) {
+      await fetch(`${API_URL}/parcelamentos/${id}`, { method: 'DELETE' });
+      carregarParcelas();
+    }
   };
 
   const valorTotalPagar = parcelas.reduce((acc, p) => acc + Number(p.valorTotal), 0);
@@ -34,7 +48,7 @@ export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: str
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-      {modalOpen && <ModalParcelamento onClose={() => setModalOpen(false)} onSave={salvarParcelamento} />}
+      {modalOpen && <ModalParcelamento onClose={() => setModalOpen(false)} onSave={salvarParcelamento} itemEditando={itemEditando} />}
 
       <button className="botao-contorno topo-voltar" onClick={() => onNavigate('inicio')}>
         ← <span style={{ fontStyle: 'italic' }}>VOLTAR</span>
@@ -48,14 +62,14 @@ export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: str
             <p style={{ fontSize: '18px', fontWeight: '800', fontStyle: 'italic', margin: 0 }}>Tudo o que você parcelou, em um só lugar.</p>
           </div>
         </div>
-        <button className="botao-azul" onClick={() => setModalOpen(true)}>+ Adicionar Parcelamento</button>
+        <button className="botao-azul" onClick={abrirModalNovo}>+ Adicionar Parcelamento</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '20px' }}>
         <div className="cartao">
-          <h2 style={{ fontSize: '20px', fontStyle: 'italic', fontWeight: '900', marginBottom: '16px' }}>✦ SEUS PARCELAMENTOS</h2>
+          <h2 style={{ fontSize: '20px', fontStyle: 'italic', fontWeight: '900', marginBottom: '16px' }}>SEUS PARCELAMENTOS</h2>
           
-          <div className="tabela-header" style={{ gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1.5fr 1.5fr 60px' }}>
+          <div className="tabela-header" style={{ gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1.5fr 1.5fr 80px' }}>
             <div>LOJA</div>
             <div>PRODUTO</div>
             <div>TOTAL</div>
@@ -68,7 +82,7 @@ export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: str
           {parcelas.map(p => {
             const valParcela = Number(p.valorTotal) / p.totalParcelas;
             return (
-            <div key={p.id} className="tabela-linha" style={{ gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1.5fr 1.5fr 60px' }}>
+            <div key={p.id} className="tabela-linha" style={{ gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1.5fr 1.5fr 80px' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><span style={{ fontSize: '20px' }}>{p.icone}</span> {p.loja}</div>
               <div>{p.produto}</div>
               <div>{formatCurrency(p.valorTotal)}</div>
@@ -77,14 +91,17 @@ export default function ParcelamentosPg({ onNavigate }: { onNavigate: (rota: str
               <div>
                 <span className={p.status === 'Vencendo' ? 'badge-amarelo' : 'badge-verde'}>{p.status}</span>
               </div>
-              <div className="lixeira" onClick={() => deletarItem(p.id)} style={{ textAlign: 'center', cursor: 'pointer', fontSize: '18px' }}>🗑️</div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                 <div className="icone-acao" onClick={() => abrirModalEditar(p)} title="Editar">✏️</div>
+                 <div className="icone-acao lixeira" onClick={() => deletarItem(p.id)} title="Excluir">🗑️</div>
+              </div>
             </div>
           )})}
         </div>
 
         <div>
           <div className="cartao">
-            <h3 style={{ fontStyle: 'italic', fontWeight: '900', margin: '0 0 16px 0' }}>📊 RESUMO</h3>
+            <h3 style={{ fontStyle: 'italic', fontWeight: '900', margin: '0 0 16px 0' }}>RESUMO</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span>Valor total</span><strong>{formatCurrency(valorTotalPagar)}</strong></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span>Valor já pago</span><strong style={{ color: '#1FA34A' }}>{formatCurrency(valorJaPago)}</strong></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}><span>Saldo devedor</span><strong style={{ color: '#1769FF' }}>{formatCurrency(saldoDevedor)}</strong></div>

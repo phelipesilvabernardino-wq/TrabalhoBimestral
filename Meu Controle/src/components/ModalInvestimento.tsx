@@ -1,20 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function ModalInvestimento({ onClose, onSave }: { onClose: () => void, onSave: (d: any) => void }) {
+export default function ModalInvestimento({ onClose, onSave, itemEditando }: { onClose: () => void, onSave: (d: any) => void, itemEditando?: any }) {
   const [tipo, setTipo] = useState('Tesouro Direto');
   const [inst, setInst] = useState('');
   const [aplic, setAplic] = useState('');
   const [atual, setAtual] = useState('');
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
 
+  useEffect(() => {
+    if (itemEditando) {
+      setTipo(itemEditando.tipo);
+      setInst(itemEditando.instituicao);
+      setAplic(itemEditando.valorAplicado);
+      setAtual(itemEditando.valorAtual);
+      setData(itemEditando.dataAplicacao);
+    }
+  }, [itemEditando]);
+
   const handleSalvar = () => {
-    if(!inst || !aplic || !atual || !data) return alert('Preencha todos os campos!');
+    if(!inst || !aplic || !atual || !data) return;
 
     onSave({
       tipo,
       instituicao: inst,
-      valorAplicado: Number(aplic.replace(',', '.')),
-      valorAtual: Number(atual.replace(',', '.')),
+      valorAplicado: Number(String(aplic).replace(',', '.')),
+      valorAtual: Number(String(atual).replace(',', '.')),
       dataAplicacao: data
     });
   };
@@ -23,7 +33,9 @@ export default function ModalInvestimento({ onClose, onSave }: { onClose: () => 
     <div className="modal-overlay">
       <div className="cartao cartao-amarelo modal-content">
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', fontStyle: 'italic' }}>✦ NOVO INVESTIMENTO</h2>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', fontStyle: 'italic' }}>
+            {itemEditando ? 'EDITAR INVESTIMENTO' : 'NOVO INVESTIMENTO'}
+          </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' }}>✕</button>
         </div>
 
@@ -55,7 +67,7 @@ export default function ModalInvestimento({ onClose, onSave }: { onClose: () => 
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
           <button className="botao-contorno" onClick={onClose}>CANCELAR</button>
-          <button className="botao-azul" onClick={handleSalvar}>SALVAR</button>
+          <button className="botao-azul" onClick={handleSalvar}>{itemEditando ? 'ATUALIZAR' : 'SALVAR'}</button>
         </div>
       </div>
     </div>

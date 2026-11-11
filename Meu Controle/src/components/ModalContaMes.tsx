@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function ModalContaMes({ onClose, onSave }: { onClose: () => void, onSave: (d: any) => void }) {
+export default function ModalContaMes({ onClose, onSave, itemEditando }: { onClose: () => void, onSave: (d: any) => void, itemEditando?: any }) {
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [desc, setDesc] = useState('');
   const [cat, setCat] = useState('🛒 Supermercado');
   const [valor, setValor] = useState('');
   const [pago, setPago] = useState(false);
 
+  useEffect(() => {
+    if (itemEditando) {
+      setData(itemEditando.data);
+      setDesc(itemEditando.descricao);
+      setCat(`${itemEditando.icone} ${itemEditando.categoria}`);
+      setValor(itemEditando.valor);
+      setPago(itemEditando.pago);
+    }
+  }, [itemEditando]);
+
   const handleSalvar = () => {
-    if(!desc || !valor || !data) return alert('Preencha os campos obrigatórios!');
+    if(!desc || !valor || !data) return;
     const icone = cat.substring(0, 2).trim();
     const categoriaTexto = cat.substring(2).trim();
 
@@ -17,7 +27,7 @@ export default function ModalContaMes({ onClose, onSave }: { onClose: () => void
       data,
       descricao: desc,
       categoria: categoriaTexto,
-      valor: Number(valor.replace(',', '.')),
+      valor: Number(String(valor).replace(',', '.')),
       pago
     });
   };
@@ -26,7 +36,9 @@ export default function ModalContaMes({ onClose, onSave }: { onClose: () => void
     <div className="modal-overlay">
       <div className="cartao cartao-amarelo modal-content">
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', fontStyle: 'italic' }}>✦ CONTA DO MÊS</h2>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', fontStyle: 'italic' }}>
+            {itemEditando ? 'EDITAR CONTA DO MÊS' : 'NOVA CONTA DO MÊS'}
+          </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer' }}>✕</button>
         </div>
 
@@ -57,7 +69,7 @@ export default function ModalContaMes({ onClose, onSave }: { onClose: () => void
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
           <button className="botao-contorno" onClick={onClose}>CANCELAR</button>
-          <button className="botao-azul" onClick={handleSalvar}>SALVAR</button>
+          <button className="botao-azul" onClick={handleSalvar}>{itemEditando ? 'ATUALIZAR' : 'SALVAR'}</button>
         </div>
       </div>
     </div>

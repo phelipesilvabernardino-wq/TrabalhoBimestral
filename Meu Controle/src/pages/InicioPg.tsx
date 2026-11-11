@@ -2,27 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { API_URL, formatCurrency } from '../utils/api';
 
 export default function InicioPg({ onNavigate }: { onNavigate: (rota: string) => void }) {
-  const [renda, setRenda] = useState(() => {
-    const rendaSalva = localStorage.getItem('rendaMensal');
-    return rendaSalva !== null ? Number(rendaSalva) : 4500;
-  });
-  const [editandoRenda, setEditandoRenda] = useState(false);
-  const [valorRendaEditado, setValorRendaEditado] = useState(String(renda));
+  const [renda] = useState(4500);
   const [despesas, setDespesas] = useState(0);
-
-  useEffect(() => {
-    localStorage.setItem('rendaMensal', String(renda));
-  }, [renda]);
-
-  const salvarRenda = () => {
-    const novoValor = Number(valorRendaEditado.replace(',', '.'));
-    if (Number.isFinite(novoValor) && novoValor >= 0) {
-      setRenda(novoValor);
-    } else {
-      setValorRendaEditado(String(renda));
-    }
-    setEditandoRenda(false);
-  };
 
   useEffect(() => {
     const fetchTotais = async () => {
@@ -49,7 +30,7 @@ export default function InicioPg({ onNavigate }: { onNavigate: (rota: string) =>
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-      <div style={{ fontSize: '16px', fontWeight: '800', fontStyle: 'italic' }}>✦ MEU CONTROLE</div>
+      <div style={{ fontSize: '16px', fontWeight: '800', fontStyle: 'italic' }}>MEU CONTROLE</div>
 
       <div style={{ margin: '24px 0 32px 0' }}>
         <h1 style={{ fontSize: '56px', fontWeight: '900', fontStyle: 'italic', margin: 0 }}>Meu dinheiro.</h1>
@@ -58,59 +39,9 @@ export default function InicioPg({ onNavigate }: { onNavigate: (rota: string) =>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        <div
-          className="cartao"
-          role="button"
-          tabIndex={0}
-          title="Clique para editar sua renda mensal"
-          onClick={() => {
-            setValorRendaEditado(String(renda));
-            setEditandoRenda(true);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              setValorRendaEditado(String(renda));
-              setEditandoRenda(true);
-            }
-          }}
-          style={{ cursor: 'pointer' }}
-        >
+        <div className="cartao">
           <div className="rotulo-cartao">RENDA DO MÊS</div>
-          {editandoRenda ? (
-            <input
-              className="valor-cartao"
-              type="number"
-              min="0"
-              step="0.01"
-              autoFocus
-              value={valorRendaEditado}
-              onChange={(event) => setValorRendaEditado(event.target.value)}
-              onClick={(event) => event.stopPropagation()}
-              onBlur={salvarRenda}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  salvarRenda();
-                }
-                if (event.key === 'Escape') {
-                  setValorRendaEditado(String(renda));
-                  setEditandoRenda(false);
-                }
-              }}
-              aria-label="Editar renda do mês"
-              style={{
-                width: '100%',
-                maxWidth: '100%',
-                border: '2px solid #1769FF',
-                borderRadius: '6px',
-                padding: '2px 6px',
-                boxSizing: 'border-box'
-              }}
-            />
-          ) : (
-            <div className="valor-cartao">{formatCurrency(renda)}</div>
-          )}
+          <div className="valor-cartao">{formatCurrency(renda)}</div>
         </div>
         <div className="cartao cartao-amarelo">
           <div className="rotulo-cartao">DESPESAS ATUAIS</div>
@@ -122,7 +53,7 @@ export default function InicioPg({ onNavigate }: { onNavigate: (rota: string) =>
         </div>
       </div>
 
-      <h2 style={{ fontSize: '22px', fontWeight: '900', fontStyle: 'italic', marginBottom: '16px' }}>✦ SEU CONTROLE FINANCEIRO</h2>
+      <h2 style={{ fontSize: '22px', fontWeight: '900', fontStyle: 'italic', marginBottom: '16px' }}>SEU CONTROLE FINANCEIRO</h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
         <div className="cartao" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
