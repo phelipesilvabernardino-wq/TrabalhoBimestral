@@ -1,25 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const ContaFixa = require('../models/ContaFixa');
+const controller = require('../controllers/contaFixaController');
 
-router.get('/', async (req, res) => {
-  const contas = await ContaFixa.findAll();
-  res.json(contas);
-});
-
-router.post('/', async (req, res) => {
-  const novaConta = await ContaFixa.create(req.body);
-  res.status(201).json(novaConta);
-});
-
-router.put('/:id', async (req, res) => {
-  await ContaFixa.update(req.body, { where: { id: req.params.id } });
-  res.json({ success: true });
-});
-
-router.delete('/:id', async (req, res) => {
-  await ContaFixa.destroy({ where: { id: req.params.id } });
-  res.json({ success: true });
-});
+router.get('/', controller.getAll);
+router.post('/', controller.create);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 module.exports = router;
